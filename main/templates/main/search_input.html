@@ -12,7 +12,7 @@
            hx-swap="innerHTML">
     <button class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-900"
             hx-get="{% url 'main:catalog_all' %}?reset_search=true" 
-            hx-target="#search-wrapper, #mobile-search-wrapper"
+            hx-target="#search-wrapper"
             hx-swap="innerHTML"
             hx-on::before-request="document.getElementById('search-input').value = ''; document.getElementById('search-input').placeholder = 'SEARCH';">
         ×

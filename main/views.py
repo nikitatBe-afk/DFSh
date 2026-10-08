@@ -1,35 +1,34 @@
 from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView, DetailView
-from django.http import HttpResponse
 from django.template.response import TemplateResponse
 from .models import Category, Product, Size
 from django.db.models import Q
 
 
-class IndexView (TemplateView):
+class IndexView(TemplateView):
     template_name = 'main/base.html'
 
 
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['categories'] = Category.objects.all
+        context['categories'] = Category.objects.all()
         context['current_category'] = None
         return context
     
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
         if request.headers.get('Hx-Request'):
-            return TemplateResponse (request, 'main/home_content.html', context)
-        return TemplateResponse(request, self.template_name, context )
+            return TemplateResponse(request, 'main/home_content.html', context)
+        return TemplateResponse(request, self.template_name, context)
     
 class CatalogView(TemplateView):
     template_name = 'main/base.html'
 
     FILTER_MAPPING = {
-        'color': lambda queryset, value: queryset.filter(color_iexact=value),
-        'min_price': lambda queryset, value: queryset.filter(price_gte=value),
-        'max_price': lambda queryset, value: queryset.filter(price_lte=value),
+        'color': lambda queryset, value: queryset.filter(color__iexact=value),
+        'min_price': lambda queryset, value: queryset.filter(price__gte=value),
+        'max_price': lambda queryset, value: queryset.filter(price__lte=value),
         'size': lambda queryset, value: queryset.filter(product_sizes__size__name=value)
     }
 
@@ -37,8 +36,7 @@ class CatalogView(TemplateView):
         context =  super().get_context_data(**kwargs)
         category_slug = kwargs.get('category_slug')
         categories = Category.objects.all()
-        products = Product.objects.all().order_by('-creatad_at')
-        current_category = None
+        products = Product.objects.all().order_by('-created_at')
 
         if category_slug:
             current_category =get_object_or_404(Category, slug = category_slug)
@@ -47,7 +45,7 @@ class CatalogView(TemplateView):
         query = self.request.GET.get('q')
         if query:
             products = products.filter(
-                Q(name_icontains = query) | Q(description_icontains = query) 
+                Q(name__icontains=query) | Q(description__icontains=query)
             )
 
         filter_params = {}
@@ -82,12 +80,12 @@ class CatalogView(TemplateView):
         context = self.get_context_data(**kwargs)
         if request.headers.get('HX-Request'):
             if context.get('show_search'):
-                return TemplateResponse(request, 'main/search_input', context)
+                return TemplateResponse(request, 'main/search_input.html', context)
             elif context.get('reset_search'):
                 return TemplateResponse(request, 'main/search_button.html', {})
             template = 'main/filter_modal.html' if request.GET.get('show_filters') == 'true' else 'main/catalog.html'
             return TemplateResponse(request, template, context)
-        return TemplateResponse(request, self.template_name, context)
+        return TemplateResponse(request, 'main/catalog_page.html', context)
     
 
 
@@ -99,8 +97,8 @@ class ProductDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        product = self.get_object()
-        context['categories'] = Category.objects,all()
+        product = self.object
+        context['categories'] = Category.objects.all()
         context['related_products'] = Product.objects.filter(
             category = product.category
         ).exclude(id = product.id)[:4]
@@ -113,7 +111,6 @@ class ProductDetailView(DetailView):
         context = self.get_context_data(**kwargs)
         if request.headers.get('HX-Request'):
             return TemplateResponse(request, 'main/product_detail.html', context)
-        raise TemplateResponse(request, self.template_name, context)
+        return TemplateResponse(request, 'main/product_detail_page.html', context)
 
         
-
