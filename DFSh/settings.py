@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'main',
+    'cart,'
 ]
 
 MIDDLEWARE = [
@@ -158,3 +159,7 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+
+SESSION_COOKIE_AGE = 86400 #30 дней
+SESSION_SAVE_EVERY_REQUEST = True
